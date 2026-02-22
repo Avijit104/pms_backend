@@ -1,0 +1,16 @@
+{
+  "name": "managerpro",
+  "version": "1.0.0",
+  "description": "a project managing application",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Avijit Ash",
+  "license": "ISC",
+  "devDependencies": {
+    "prettier": "3.8.1"
+  }
+}
