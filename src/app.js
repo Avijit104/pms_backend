@@ -13,10 +13,11 @@ app.use(
         origin: process.env.ORIGIN?.split(",") || "http://localhost:3010",
         credentials: true,
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allowedHeaders: ["Contentaa-Type", "Authorization"],
+        allowedHeaders: ["Content-Type", "Authorization"],
     }),
 )
 app.use("/api/v1/healthcheck", healthchekRouter)
+
 app.get("/", (req, res) => {
     res.send("wellcome to managerpro")
 })
