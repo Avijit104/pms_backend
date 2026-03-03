@@ -1,5 +1,7 @@
 import express from "express"
 import cors from "cors"
+import healthchekRouter from "./routes/healthcheck.routes.js"
+
 const app = express()
 
 app.use(express.json({ limit: "16kb" }))
@@ -14,7 +16,7 @@ app.use(
         allowedHeaders: ["Contentaa-Type", "Authorization"],
     }),
 )
-app
+app.use("/api/v1/healthcheck", healthchekRouter)
 app.get("/", (req, res) => {
     res.send("wellcome to managerpro")
 })
