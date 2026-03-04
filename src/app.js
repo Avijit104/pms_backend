@@ -19,7 +19,7 @@ app.use(
 app.use("/api/v1/healthcheck", healthchekRouter)
 
 app.get("/", (req, res) => {
-    res.send("wellcome to managerpro")
+    res.send("wellcome to managepro")
 })
 
 export default app
