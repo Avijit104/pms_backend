@@ -15,10 +15,9 @@ const userSchema = new Schema(
                 local: "",
             },
         },
-        userName: {
+        username: {
             type: String,
             required: true,
-            unique: true,
             lowercase: true,
             index: true,
             trim: true,

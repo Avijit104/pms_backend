@@ -69,4 +69,4 @@ const mailSender = async (options) => {
     }
 }
 
-export { emailVarificationContent, resetPasswordContent }
+export { emailVarificationContent, resetPasswordContent, mailSender }
