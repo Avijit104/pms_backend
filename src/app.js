@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import healthchekRouter from "./routes/healthcheck.routes.js"
+import authRouter from "./routes/auth.routes.js"
 
 const app = express()
 
@@ -17,6 +18,7 @@ app.use(
     }),
 )
 app.use("/api/v1/healthcheck", healthchekRouter)
+app.use("/api/v1/auth", authRouter)
 
 app.get("/", (req, res) => {
     res.send("wellcome to managepro")

@@ -3,35 +3,39 @@ import nodemailer from "nodemailer"
 
 const emailVarificationContent = (username, varificationUrl) => {
     return {
-        name: username,
-        intro: "Welcome to ManagePro",
-        action: {
-            intstructions:
-                "To verifiy your registered email id please click on the following button",
-            button: {
-                color: "#22BC66",
-                text: "Verifiy Email",
-                link: varificationUrl,
+        body: {
+            name: username,
+            intro: "Welcome to ManagePro",
+            action: {
+                intstructions:
+                    "To verifiy your registered email id please click on the following button",
+                button: {
+                    color: "#22BC66",
+                    text: "Verifiy Email",
+                    link: varificationUrl,
+                },
             },
+            outro: "Need help, or have questions? Just reply to this email",
         },
-        outro: "Need help, or have questions? Just reply to this email",
     }
 }
 
 const resetPasswordContent = (username, resetPasswordUrl) => {
     return {
-        name: username,
-        intro: "Wellcome to ManagePro",
-        action: {
-            intstructions:
-                "To reset your password please click on the following button",
-            button: {
-                color: "#22BC66",
-                text: "Reset Password",
-                link: resetPasswordUrl,
+        body: {
+            name: username,
+            intro: "Wellcome to ManagePro",
+            action: {
+                intstructions:
+                    "To reset your password please click on the following button",
+                button: {
+                    color: "#22BC66",
+                    text: "Reset Password",
+                    link: resetPasswordUrl,
+                },
             },
+            outro: "If it is not you then just ignore this email",
         },
-        outro: "If it is not you then just ignore this email",
     }
 }
 
