@@ -74,4 +74,43 @@ const registerUser = requestHandler(async (req, res) => {
         )
 })
 
-export { registerUser, addTokens }
+const loginUser = requestHandler(async (req, res) => {
+    const { email, password } = req.body
+    const loggedinUser = await user.findOne({ email })
+    if (!loggedinUser) {
+        throw new ApiError(400, "email is not registered")
+    }
+    const status = loggedinUser.passwordValidation(password)
+    if (!status) {
+        throw new ApiError(400, "Invalid credentials")
+    }
+    const { accessToken, refreshToken } = await addTokens(loggedinUser._id)
+
+    const currUser = await user
+        .findById(loggedinUser._id)
+        .select(
+            "-password -refreshToken -emailVerificationToken -avatar -forgotPasswordToken",
+        )
+    const options = {
+        httpOnly: true,
+        secure: true,
+    }
+
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    user: currUser,
+                    accessToken: accessToken,
+                    refreshToken: refreshToken,
+                },
+                "user loggedin successfully",
+            ),
+        )
+})
+
+export { registerUser, loginUser }

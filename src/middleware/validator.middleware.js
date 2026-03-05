@@ -1,7 +1,7 @@
 import { validationResult } from "express-validator"
 import { ApiError } from "../util/ApiError.js"
 
-const validtor = (req, res, next) => {
+const validator = (req, res, next) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
         return next()
@@ -11,4 +11,4 @@ const validtor = (req, res, next) => {
     throw new ApiError(422, "invalid data", extractErrors)
 }
 
-export { validtor }
+export { validator }

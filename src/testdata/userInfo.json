@@ -1,5 +1,11 @@
-{
-    "email": "three@three.com",
-    "username": "three",
-    "password": "123456"
-}
+[
+    {
+        "email": "three@three.com",
+        "username": "three",
+        "password": "123456"
+    },
+    {
+        "email": "three@three.com",
+        "password": "123456"
+    }
+]
