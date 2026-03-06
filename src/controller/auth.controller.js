@@ -3,6 +3,7 @@ import { ApiResponse } from "../util/ApiResponse.js"
 import { requestHandler } from "../util/reqestHandler.js"
 import { ApiError } from "../util/ApiError.js"
 import { mailSender, emailVarificationContent } from "../util/mailContent.js"
+import jwt from "jsonwebtoken"
 
 const addTokens = async (userId) => {
     try {
@@ -132,4 +133,120 @@ const logoutUser = requestHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "user logged out successfully"))
 })
 
-export { registerUser, loginUser, logoutUser }
+const getCurrentUser = requestHandler(async (req, res) => {
+    return res.status(200).json(new ApiResponse(200, req.user, "current user"))
+})
+
+const verifyEmail = requestHandler(async (req, res) => {
+    const { emailVerificationToken } = req.params
+    if (!emailVerificationToken) {
+        throw new ApiError(400, "email verification token is missing")
+    }
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(emailVerificationToken)
+        .digest("hex")
+
+    const currUser = await user.findOne({
+        emailVerificationToken: hashedToken,
+        emailVerificationExpiry: { $gt: Date.now() },
+    })
+    if (!currUser) {
+        throw new ApiError(400, "Invalid user")
+    }
+
+    currUser.isEmailVerified = true
+    currUser.emailVerificationToken = undefined
+    currUser.emailVerificationExpiry = undefined
+
+    await currUser.save({ validateBeforeSave: false })
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "email verified successfully"))
+})
+
+const reqestEmailVerification = requestHandler(async (req, res) => {
+    const currUser = await user.findById(req?.user._id)
+    if (!currUser) {
+        throw new ApiError(404, "user not found")
+    }
+    const { unHasedToken, hashedToken, tokenExpiry } =
+        currUser.generateTempTokens()
+
+    currUser.emailVerificationToken = hashedToken
+    currUser.emailVerificationExpiry = tokenExpiry
+    awaitcurrUser.save({ validateBeforeSave: false })
+
+    await mailSender({
+        email: currUser.email,
+        subject: "please validate your email address",
+        mailgenContent: emailVarificationContent(
+            currUser.username,
+            `${req.protocol}://${req.get("host")}/api/v1/users/verify-email/${unHasedToken}`,
+        ),
+    })
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "email verification mail sent successfully",
+            ),
+        )
+})
+
+const refreshAccessToken = requestHandler(async (req, res) => {
+    const incommingToken = req.cookies.refreshToken
+    if (!incommingToken) {
+        throw new ApiError(401, "unautherized user")
+    }
+    try {
+        const decodedToken = jwt.verify(
+            incommingToken,
+            process.env.REFRESH_TOKEN_SECRET,
+        )
+        const currUser = await user.findById(decodedToken._id)
+        if (!currUser) {
+            throw new ApiError(401, "Invalid user")
+        }
+        if (currUser.refreshToken !== incommingToken) {
+            throw new ApiError(401, "refresh token is expired")
+        }
+        const { accessToken, refreshToken } = await addTokens(currUser._id)
+
+        const options = {
+            httpOnly: true,
+            secure: true,
+        }
+
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json(
+                new ApiResponse(
+                    200,
+                    {
+                        accessToken: accessToken,
+                        refreshToken: refreshToken,
+                    },
+                    "access token updated successfully",
+                ),
+            )
+    } catch (error) {
+        throw new ApiError(401, "Invalid refresh token")
+    }
+})
+
+export {
+    registerUser,
+    loginUser,
+    logoutUser,
+    getCurrentUser,
+    verifyEmail,
+    reqestEmailVerification,
+    refreshAccessToken,
+}

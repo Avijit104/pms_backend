@@ -3,6 +3,7 @@ import {
     loginUser,
     logoutUser,
     registerUser,
+    getCurrentUser,
 } from "../controller/auth.controller.js"
 import { validator } from "../middleware/validator.middleware.js"
 import { jwtVerifier } from "../middleware/auth.middleware.js"
@@ -19,5 +20,7 @@ router
 router.route("/login").post(userLoginValidator(), validator, loginUser)
 
 router.route("/logout").post(jwtVerifier, logoutUser)
+
+router.route("/current-user").get(jwtVerifier, getCurrentUser)
 
 export default router

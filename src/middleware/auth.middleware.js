@@ -4,9 +4,7 @@ import { user } from "../model/user.model.js"
 import { requestHandler } from "../util/reqestHandler.js"
 
 export const jwtVerifier = requestHandler(async (req, res, next) => {
-    const token =
-        req?.cookies.accessToken ||
-        req.header("Authorization")?.replace("Bearer ", "")
+    const token = req?.cookies.accessToken
     if (!token) {
         throw new ApiError(401, "Unautherize request")
     }
