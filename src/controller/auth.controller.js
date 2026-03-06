@@ -241,6 +241,104 @@ const refreshAccessToken = requestHandler(async (req, res) => {
     }
 })
 
+const forgotPassword = requestHandler(async (req, res) => {
+    const { email } = req.body
+    const currUser = await user.findOne({ email })
+
+    if (!currUser) {
+        throw new ApiError(404, "User not found")
+    }
+
+    const { unHasedToken, hashedToken, tokenExpiry } =
+        currUser.generateTempTokens()
+
+    currUser.forgotPasswordToken = hashedToken
+    currUser.forgotPasswordExpiry = tokenExpiry
+    await currUser.save({ validateBeforeSave: false })
+
+    await mailSender({
+        email: currUser?.email,
+        subject: "forgot password request",
+        mailgenContent: resetPasswordContent(
+            currUser.username,
+            `${process.env.FORGOT_PASSOWRD_URL}/${unHasedToken}`,
+        ),
+    })
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { unHasedToken, hashedToken, tokenExpiry },
+                "forgot password mail sent successfully",
+            ),
+        )
+})
+
+const resetPassword = requestHandler(async (req, res) => {
+    const { password } = req.body
+    const { incommingToken } = req.params
+    if (!incommingToken) {
+        throw new ApiError(400, "reset password token is missing")
+    }
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(incommingToken)
+        .digest("hex")
+
+    const currUser = await user.findOne({
+        forgotPasswordToken: hashedToken,
+        forgotPasswordExpiry: { $gt: Date.now() },
+    })
+    if (!currUser) {
+        throw new ApiError(489, "token has been expired")
+    }
+
+    currUser.password = password
+    currUser.forgotPasswordToken = undefined
+    currUser.forgotPasswordExpiry = undefined
+    await currUser.save({ validateBeforeSave: false })
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "your password has been changed successfully",
+            ),
+        )
+})
+
+const changePassword = requestHandler(async (req, res) => {
+    const { oldPassword, newPassword } = req.body
+    const currUser = await user.findById(req.user?._id)
+    const isValidated = currUser.passwordValidation(oldPassword)
+    if (!isValidated) {
+        throw new ApiError(400, "wrong password ")
+    }
+
+    currUser.password = newPassword
+    await currUser.save({ validateBeforeSave: false })
+
+    const updatedUser = await user
+        .findById(newUser._id)
+        .select(
+            "-password -refreshToken -emailVerificationToken -avatar -forgotPasswordToken",
+        )
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { updatedUser },
+                "password changed successfully",
+            ),
+        )
+})
+
 export {
     registerUser,
     loginUser,
@@ -249,4 +347,7 @@ export {
     verifyEmail,
     reqestEmailVerification,
     refreshAccessToken,
+    forgotPassword,
+    resetPassword,
+    changePassword,
 }
