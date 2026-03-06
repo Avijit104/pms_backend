@@ -1,6 +1,6 @@
 import { body } from "express-validator"
 
-const userValidator = () => {
+const userRgistrationValidator = () => {
     return [
         body("email")
             .trim()
@@ -23,4 +23,17 @@ const userValidator = () => {
     ]
 }
 
-export { userValidator }
+const userLoginValidator = () => {
+    return [
+        body("email")
+            .trim()
+            .isEmail()
+            .withMessage("Please enter a valid Email")
+            .notEmpty()
+            .withMessage("Email is required"),
+
+        body("password").trim().notEmpty().withMessage("Password is required"),
+    ]
+}
+
+export { userRgistrationValidator, userLoginValidator }
