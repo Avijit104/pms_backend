@@ -46,10 +46,6 @@ const registerUser = requestHandler(async (req, res) => {
     const { unHasedToken, hashedToken, tokenExpiry } =
         newUser.generateTempTokens()
 
-    newUser.emailVerificationToken = hashedToken
-    newUser.emailVerificationExpiry = tokenExpiry
-    await newUser.save({ validateBeforeSave: false })
-
     await mailSender({
         email: newUser.email,
         subject: "please validate your email address",
@@ -58,6 +54,10 @@ const registerUser = requestHandler(async (req, res) => {
             `${req.protocol}://${req.get("host")}/api/v1/users/verify-email/${unHasedToken}`,
         ),
     })
+
+    newUser.emailVerificationToken = hashedToken
+    newUser.emailVerificationExpiry = tokenExpiry
+    await newUser.save({ validateBeforeSave: false })
 
     const createdUser = await user
         .findById(newUser._id)
@@ -180,10 +180,6 @@ const reqestEmailVerification = requestHandler(async (req, res) => {
     const { unHasedToken, hashedToken, tokenExpiry } =
         currUser.generateTempTokens()
 
-    currUser.emailVerificationToken = hashedToken
-    currUser.emailVerificationExpiry = tokenExpiry
-    await currUser.save({ validateBeforeSave: false })
-
     await mailSender({
         email: currUser.email,
         subject: "please validate your email address",
@@ -192,6 +188,10 @@ const reqestEmailVerification = requestHandler(async (req, res) => {
             `${req.protocol}://${req.get("host")}/api/v1/users/verify-email/${unHasedToken}`,
         ),
     })
+
+    currUser.emailVerificationToken = hashedToken
+    currUser.emailVerificationExpiry = tokenExpiry
+    await currUser.save({ validateBeforeSave: false })
 
     return res.status(200).json(
         new ApiResponse(
@@ -260,10 +260,6 @@ const forgotPassword = requestHandler(async (req, res) => {
     const { unHasedToken, hashedToken, tokenExpiry } =
         currUser.generateTempTokens()
 
-    currUser.forgotPasswordToken = hashedToken
-    currUser.forgotPasswordExpiry = tokenExpiry
-    await currUser.save({ validateBeforeSave: false })
-
     await mailSender({
         email: currUser?.email,
         subject: "forgot password request",
@@ -272,6 +268,10 @@ const forgotPassword = requestHandler(async (req, res) => {
             `${process.env.FORGOT_PASSOWRD_URL}/${unHasedToken}`,
         ),
     })
+
+    currUser.forgotPasswordToken = hashedToken
+    currUser.forgotPasswordExpiry = tokenExpiry
+    await currUser.save({ validateBeforeSave: false })
 
     return res
         .status(200)
