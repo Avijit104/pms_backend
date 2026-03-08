@@ -2,8 +2,13 @@ import { user } from "../model/user.model.js"
 import { ApiResponse } from "../util/ApiResponse.js"
 import { requestHandler } from "../util/reqestHandler.js"
 import { ApiError } from "../util/ApiError.js"
-import { mailSender, emailVarificationContent } from "../util/mailContent.js"
+import {
+    mailSender,
+    emailVarificationContent,
+    resetPasswordContent,
+} from "../util/mailContent.js"
 import jwt from "jsonwebtoken"
+import crypto from "crypto"
 
 const addTokens = async (userId) => {
     try {
@@ -69,7 +74,7 @@ const registerUser = requestHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                { user: createdUser },
+                { user: createdUser, unhasedtoken: unHasedToken },
                 "user registered successfully and verification email has been sent on your email",
             ),
         )
@@ -139,6 +144,7 @@ const getCurrentUser = requestHandler(async (req, res) => {
 
 const verifyEmail = requestHandler(async (req, res) => {
     const { emailVerificationToken } = req.params
+    console.log(emailVerificationToken)
     if (!emailVerificationToken) {
         throw new ApiError(400, "email verification token is missing")
     }
@@ -176,7 +182,7 @@ const reqestEmailVerification = requestHandler(async (req, res) => {
 
     currUser.emailVerificationToken = hashedToken
     currUser.emailVerificationExpiry = tokenExpiry
-    awaitcurrUser.save({ validateBeforeSave: false })
+    await currUser.save({ validateBeforeSave: false })
 
     await mailSender({
         email: currUser.email,
@@ -187,15 +193,17 @@ const reqestEmailVerification = requestHandler(async (req, res) => {
         ),
     })
 
-    return res
-        .status(200)
-        .json(
-            new ApiResponse(
-                200,
-                {},
-                "email verification mail sent successfully",
-            ),
-        )
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                hashedToken: hashedToken,
+                unHasedToken: unHasedToken,
+                tokenExpiry: tokenExpiry,
+            },
+            "email verification mail sent successfully",
+        ),
+    )
 })
 
 const refreshAccessToken = requestHandler(async (req, res) => {
@@ -323,7 +331,7 @@ const changePassword = requestHandler(async (req, res) => {
     await currUser.save({ validateBeforeSave: false })
 
     const updatedUser = await user
-        .findById(newUser._id)
+        .findById(currUser._id)
         .select(
             "-password -refreshToken -emailVerificationToken -avatar -forgotPasswordToken",
         )
