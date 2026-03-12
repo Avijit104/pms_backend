@@ -1,4 +1,19 @@
 import { Router } from "express"
+
+// middlewares
+import { validator } from "../middleware/validator.middleware.js"
+import { jwtVerifier } from "../middleware/auth.middleware.js"
+
+//validators
+import {
+    userRgistrationValidator,
+    userLoginValidator,
+    resetPasswordValidator,
+    userForgotResetPassword,
+    changePasswordValidator,
+} from "../validators/user.validator.js"
+
+// controllers
 import {
     loginUser,
     logoutUser,
@@ -11,15 +26,6 @@ import {
     changePassword,
     reqestEmailVerification,
 } from "../controller/auth.controller.js"
-import { validator } from "../middleware/validator.middleware.js"
-import { jwtVerifier } from "../middleware/auth.middleware.js"
-import {
-    userRgistrationValidator,
-    userLoginValidator,
-    resetPasswordValidator,
-    userForgotResetPassword,
-    changePasswordValidator,
-} from "../validators/user.validator.js"
 
 const router = Router()
 
