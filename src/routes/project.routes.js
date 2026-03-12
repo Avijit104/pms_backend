@@ -10,7 +10,7 @@ import {
     createProjectValidator,
     updateProjectValidator,
     addProjectMemberValidator,
-    changeProjectMemberValidator,
+    updateProjectMemberValidator,
 } from "../validators/project.validator.js"
 
 // controllers
@@ -29,15 +29,12 @@ import {
 const router = Router()
 router.use(jwtVerifier)
 
-router
-    .route("/")
-    .get(getProject)
-    .post(
-        validateProjectPermissions([roles.ADMIN]),
-        createProjectValidator(),
-        validator,
-        createProject,
-    )
+router.route("/").get(getProject).post(
+    // validateProjectPermissions([roles.ADMIN]),
+    createProjectValidator(),
+    validator,
+    createProject,
+)
 
 router
     .route("/:projectId")
@@ -64,14 +61,12 @@ router
     .route("/:projectId/members/:userId")
     .put(
         validateProjectPermissions([roles.ADMIN]),
-        changeProjectMemberValidator(),
+        updateProjectMemberValidator(),
         validator,
         updateMemberRole,
     )
     .delete(
         validateProjectPermissions([roles.ADMIN, roles.PROJECT_ADMIN]),
-        changeProjectMemberValidator(),
-        validator,
         removeProjectMember,
     )
 export default router

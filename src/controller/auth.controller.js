@@ -1,14 +1,18 @@
-import { user } from "../model/user.model.js"
-import { ApiResponse } from "../util/ApiResponse.js"
-import { requestHandler } from "../util/reqestHandler.js"
-import { ApiError } from "../util/ApiError.js"
+import jwt from "jsonwebtoken"
+import crypto from "crypto"
 import {
     mailSender,
     emailVarificationContent,
     resetPasswordContent,
 } from "../util/mailContent.js"
-import jwt from "jsonwebtoken"
-import crypto from "crypto"
+
+// api handlers
+import { ApiError } from "../util/ApiError.js"
+import { ApiResponse } from "../util/ApiResponse.js"
+import { requestHandler } from "../util/reqestHandler.js"
+
+// models
+import { user } from "../model/user.model.js"
 
 const addTokens = async (userId) => {
     try {

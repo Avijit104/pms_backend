@@ -1,11 +1,15 @@
+import mongoose from "mongoose"
+import { availableRoles, roles } from "../util/constants.js"
+
+// api handlers
+import { ApiError } from "../util/ApiError.js"
+import { ApiResponse } from "../util/ApiResponse.js"
+import { requestHandler } from "../util/reqestHandler.js"
+
+// models
 import { project } from "../model/project.model.js"
 import { members } from "../model/members.model.js"
 import { user } from "../model/user.model.js"
-import { ApiResponse } from "../util/ApiResponse.js"
-import { requestHandler } from "../util/reqestHandler.js"
-import { ApiError } from "../util/ApiError.js"
-import mongoose from "mongoose"
-import { roles } from "../util/constants.js"
 
 const createProject = requestHandler(async (req, res) => {
     const { name, desc } = req.body
@@ -152,7 +156,13 @@ const deleteProject = requestHandler(async (req, res) => {
     }
     return res
         .status(200)
-        .json(new ApiResponse(200, {}, "project deleted successfully"))
+        .json(
+            new ApiResponse(
+                200,
+                { deletedProject },
+                "project deleted successfully",
+            ),
+        )
 })
 
 const addProjectMember = requestHandler(async (req, res) => {
@@ -216,14 +226,14 @@ const getProjectMembers = requestHandler(async (req, res) => {
         {
             $addFields: {
                 members: {
-                    $arrayElementAt: ["$members", 0],
+                    $arrayElemAt: ["$members", 0],
                 },
             },
         },
         {
             $project: {
                 project: 1,
-                user: 1,
+                members: 1,
                 role: 1,
                 _id: 0,
             },
@@ -241,7 +251,7 @@ const getProjectMembers = requestHandler(async (req, res) => {
 })
 
 const removeProjectMember = requestHandler(async (req, res) => {
-    const { projectId, userId } = req.body
+    const { projectId, userId } = req.params
 
     const member = await members.findOne({
         project: new mongoose.Types.ObjectId(projectId),
@@ -270,8 +280,8 @@ const removeProjectMember = requestHandler(async (req, res) => {
 
 const updateMemberRole = requestHandler(async (req, res) => {
     const { userId, projectId } = req.params
-    const { newRole } = req.body
-    if (!roles.includes(newRole)) {
+    const { role } = req.body
+    if (!availableRoles.includes(role)) {
         throw new ApiError(200, "invalid role")
     }
     let member = await members.findOne({
@@ -283,10 +293,10 @@ const updateMemberRole = requestHandler(async (req, res) => {
         throw new ApiError(404, "project member not found")
     }
 
-    member = await member.findOneAndUpdate(
+    member = await members.findOneAndUpdate(
         member._id,
         {
-            role: newRole,
+            role: role,
         },
         {
             new: true,

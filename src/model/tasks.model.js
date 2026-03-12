@@ -28,6 +28,16 @@ const taskSchema = new Schema(
             ref: "users",
             required: true,
         },
+        attachments: {
+            type: [
+                {
+                    url: String,
+                    mimetype: String,
+                    size: Number,
+                },
+            ],
+            default: [],
+        },
         status: {
             type: String,
             enum: avaliableTaskStatus,

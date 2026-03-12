@@ -36,14 +36,18 @@ const addProjectMemberValidator = () => {
             .notEmpty()
             .withMessage("role is required")
             .isIn(availableRoles)
-            .withMessage("role is invalid"),
+            .withMessage("invalid role"),
     ]
 }
 
-const changeProjectMemberValidator = () => {
+const updateProjectMemberValidator = () => {
     return [
-        body("projectId").trim().notEmpty().withMessage("projectId is missing"),
-        body("userId").trim().notEmpty().withMessage("user id is missing"),
+        body("role")
+            .trim()
+            .notEmpty()
+            .withMessage("member role is required")
+            .isIn(availableRoles)
+            .withMessage("invalid role"),
     ]
 }
 
@@ -51,5 +55,5 @@ export {
     createProjectValidator,
     updateProjectValidator,
     addProjectMemberValidator,
-    changeProjectMemberValidator,
+    updateProjectMemberValidator,
 }

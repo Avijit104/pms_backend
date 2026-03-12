@@ -1,13 +1,11 @@
 import { requestHandler } from "../util/reqestHandler.js"
 import { ApiError } from "../util/ApiError.js"
-import { user } from "../model/user.model.js"
-import { project } from "../model/project.model.js"
 import { members } from "../model/members.model.js"
 import mongoose from "mongoose"
 
-export const validateProjectPermissions = (roles = []) => {
+export const validateProjectPermissions = function (roles = []) {
     // This middleware always runs after the verifyJwt middleware
-    requestHandler(async (req, res, next) => {
+    return requestHandler(async (req, res, next) => {
         const { projectId } = req.params
 
         if (!projectId) {
