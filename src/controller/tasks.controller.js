@@ -141,15 +141,151 @@ const getTaskById = requestHandler(async (req, res) => {
         .json(new ApiResponse(200, { currTask }, "task fetch is successfull"))
 })
 
-const updateTask = requestHandler(async (req, res) => {})
+const updateTask = requestHandler(async (req, res) => {
+    const { title, desc, assignedTo, status } = req.body
+    const { taskId } = req.params
+    if (!taskId) {
+        throw new ApiError(409, "task id is missing")
+    }
+    const currTask = await tasks.findByIdAndUpdate(
+        taskId,
+        {
+            $set: {
+                title: title,
+                desc: desc,
+                assignedTo: new mongoose.Types.ObjectId(assignedTo),
+                status: status,
+            },
+        },
+        {
+            new: true,
+        },
+    )
+    if (!currTask) {
+        throw new ApiError(404, "task not found")
+    }
+    currTask.save({ validateBeforeSave: false })
 
-const deleteTask = requestHandler(async (req, res) => {})
+    return res
+        .status(200)
+        .json(new ApiResponse(200, { currTask }, "task updation is successful"))
+})
 
-const createSubTask = requestHandler(async (req, res) => {})
+const deleteTask = requestHandler(async (req, res) => {
+    const { taskId } = req.params
+    if (!taskId) {
+        throw new ApiError(409, "task id is missing")
+    }
 
-const updateSubTask = requestHandler(async (req, res) => {})
+    const deletedTask = await tasks.findByIdAndDelete(taskId)
 
-const deleteSubTask = requestHandler(async (req, res) => {})
+    const deletedSubTask = await subTasks.deleteMany({ task: { taskId } })
+
+    if (!deletedTask) {
+        throw new ApiError(400, "task deletion failed")
+    }
+
+    if (!deletedSubTask) {
+        throw new ApiError(400, "subtasks deletion failed")
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { tasks: deletedTask, subTasks: deletedSubTask },
+                "task deletion successful",
+            ),
+        )
+})
+
+const createSubTask = requestHandler(async (req, res) => {
+    const { title, isCompleted, assignedBy } = req.body
+    const { taskId } = req.params
+
+    if (!taskId) {
+        throw new ApiError(400, "taskid is missing")
+    }
+    const newSubTask = await subTasks.create({
+        title,
+        task: new mongoose.Types.ObjectId(taskId),
+        isCompleted,
+        createdBy: new mongoose.Types.ObjectId(req.user._id),
+    })
+
+    if (!newSubTask) {
+        throw new ApiError(400, "sub task creation failed")
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { newSubTask },
+                "sub task created successfully",
+            ),
+        )
+})
+
+const updateSubTask = requestHandler(async (req, res) => {
+    const { title, isCompleted } = req.body
+    const { subTaskId } = req.params
+
+    if (!subTaskId) {
+        throw new ApiError(400, "subtask Id is missing")
+    }
+
+    const currSubTask = await subTasks.findByIdAndUpdate(
+        subTaskId,
+        {
+            $set: {
+                title: title,
+                isCompleted: isCompleted,
+            },
+        },
+        {
+            new: true,
+        },
+    )
+    if (!currSubTask) {
+        throw new ApiError(404, "subtasks not found")
+    }
+
+    currSubTask.save({ validateBeforeSave: false })
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { currSubTask },
+                "sub task updated successfully",
+            ),
+        )
+})
+
+const deleteSubTask = requestHandler(async (req, res) => {
+    const { subTaskId } = req.params
+    if (!subTaskId) {
+        throw new ApiError(400, "sub task id is missing")
+    }
+    const deletedSubTask = await subTasks.findByIdAndDelete(subTaskId)
+    if (!deleteSubTask) {
+        throw new ApiError(404, "subtask not found")
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { deletedSubTask },
+                "sub task deleted successfully",
+            ),
+        )
+})
 
 export {
     getTask,
