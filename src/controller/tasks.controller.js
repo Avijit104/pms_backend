@@ -7,7 +7,6 @@ import { requestHandler } from "../util/reqestHandler.js"
 import { tasks } from "../model/tasks.model.js"
 import { subTasks } from "../model/subtasks.model.js"
 import { project } from "../model/project.model.js"
-import { user } from "../model/user.model.js"
 import mongoose from "mongoose"
 
 const createTask = requestHandler(async (req, res) => {
@@ -67,6 +66,7 @@ const getTask = requestHandler(async (req, res) => {
 
 const getTaskById = requestHandler(async (req, res) => {
     const { taskId } = req.params
+    console.log(taskId)
     const currTask = await tasks.aggregate([
         {
             $match: {
@@ -75,7 +75,7 @@ const getTaskById = requestHandler(async (req, res) => {
         },
         {
             $lookup: {
-                form: "users",
+                from: "users",
                 localField: "assignedTo",
                 foreignField: "_id",
                 as: "userDetails",
@@ -164,7 +164,6 @@ const updateTask = requestHandler(async (req, res) => {
     if (!currTask) {
         throw new ApiError(404, "task not found")
     }
-    currTask.save({ validateBeforeSave: false })
 
     return res
         .status(200)
@@ -179,7 +178,7 @@ const deleteTask = requestHandler(async (req, res) => {
 
     const deletedTask = await tasks.findByIdAndDelete(taskId)
 
-    const deletedSubTask = await subTasks.deleteMany({ task: { taskId } })
+    const deletedSubTask = await subTasks.deleteMany({ task: taskId })
 
     if (!deletedTask) {
         throw new ApiError(400, "task deletion failed")
@@ -201,7 +200,7 @@ const deleteTask = requestHandler(async (req, res) => {
 })
 
 const createSubTask = requestHandler(async (req, res) => {
-    const { title, isCompleted, assignedBy } = req.body
+    const { title, isCompleted } = req.body
     const { taskId } = req.params
 
     if (!taskId) {

@@ -29,12 +29,15 @@ import {
 const router = Router()
 router.use(jwtVerifier)
 
-router.route("/").get(getProject).post(
-    // validateProjectPermissions([roles.ADMIN]),
-    createProjectValidator(),
-    validator,
-    createProject,
-)
+router
+    .route("/")
+    .get(getProject)
+    .post(
+        validateProjectPermissions([roles.ADMIN]),
+        createProjectValidator(),
+        validator,
+        createProject,
+    )
 
 router
     .route("/:projectId")

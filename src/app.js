@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser"
 import healthchekRouter from "./routes/healthcheck.routes.js"
 import authRouter from "./routes/auth.routes.js"
 import projectRouter from "./routes/project.routes.js"
+import tasksRouter from "./routes/tasks.routes.js"
 
 const app = express()
 
@@ -31,6 +32,7 @@ app.use(
 app.use("/api/v1/healthcheck", healthchekRouter)
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/projects/", projectRouter)
+app.use("/api/v1/tasks/", tasksRouter)
 
 //running server-----------------------------------------------------------------------------------------------------
 app.get("/", (req, res) => {

@@ -15,5 +15,11 @@
     {
         "email": "five@five.com",
         "role": "member"
+    },
+    {
+        "title": "task 1",
+        "desc": "this is a demo task",
+        "assignTo": "69b2290f41e3223f69710648",
+        "status": "todo"
     }
 ]
