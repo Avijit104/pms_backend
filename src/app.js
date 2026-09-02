@@ -36,7 +36,7 @@ app.use("/api/v1/tasks/", tasksRouter)
 
 //running server-----------------------------------------------------------------------------------------------------
 app.get("/", (req, res) => {
-    res.send("wellcome to managepro")
+    res.status(200).json({ message: "wellcome to managepro" })
 })
 
 export default app

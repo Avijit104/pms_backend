@@ -8,9 +8,7 @@ const port = process.env.PORT || 3000
 
 dbConnect()
     .then(() => {
-        app.listen(port, () => {
-            console.log(`url : http://localhost:${port}`)
-        })
+        app.listen(port)
     })
     .catch((err) => {
         console.error("app error form mongo", err)
