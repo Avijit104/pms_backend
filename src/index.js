@@ -12,5 +12,6 @@ dbConnect()
     })
     .catch((err) => {
         console.error("app error form mongo", err)
+        console.log("this is fetal error ")
         process.exit(1)
     })
